@@ -20,8 +20,8 @@ extension ScreenStatusTypeX on ScreenStatusType {
   bool get isUpdated => this == ScreenStatusType.updated;
 }
 
-class BaseScreenState<T> extends Equatable {
-  const BaseScreenState({
+class BaseDataState<T> extends Equatable {
+  const BaseDataState({
     ScreenStatusType? status,
     this.value,
     String? message,
@@ -34,13 +34,13 @@ class BaseScreenState<T> extends Equatable {
   final String message;
   final int? errorCode;
 
-  BaseScreenState<T> copyWith({
+  BaseDataState<T> copyWith({
     ScreenStatusType? status,
     T? value,
     String? message,
     int? errorCode,
   }) =>
-      BaseScreenState(
+      BaseDataState(
         status: status ?? this.status,
         value: value ?? this.value,
         message: message ?? this.message,

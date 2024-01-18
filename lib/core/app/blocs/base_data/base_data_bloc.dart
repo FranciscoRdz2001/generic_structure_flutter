@@ -12,31 +12,31 @@ import 'package:generic_structure_flutter/domain/repositories/i_base_repository.
 part 'base_data_event.dart';
 part 'base_data_state.dart';
 
-abstract class BaseScreenBloc<T, N extends IBaseRepository<T>,
-    P extends ScreenParams> extends Bloc<BaseScreenEvent, BaseScreenState<T>> {
+abstract class BaseDataBloc<T, N extends IBaseRepository<T>,
+    P extends BaseDataParams> extends Bloc<BaseDataEvent, BaseDataState<T>> {
   final N repository;
-  BaseScreenBloc({
+  BaseDataBloc({
     required this.hasConnection,
     required this.repository,
-  }) : super(BaseScreenState<T>()) {
-    on<CallAction<P>>(onCallAction);
-    on<RestoreData>(_restoreData);
+  }) : super(BaseDataState<T>()) {
+    on<CallAction<P>>(_onCallAction);
   }
 
   final HasConnection hasConnection;
 
-  FutureOr<void> onCallAction(
+  FutureOr<void> _onCallAction(
     CallAction<P> event,
-    Emitter<BaseScreenState<T>> emit,
+    Emitter<BaseDataState<T>> emit,
   ) async {
     emit(state.copyWith(status: ScreenStatusType.loading));
+    log('Debug');
     late bool hasInternet;
     hasInternet = await hasConnection.call();
     if (!hasInternet) {
       emit(state.copyWith(status: ScreenStatusType.noInternet));
       return;
     }
-    final res = await repositoryCall(event.params as P?);
+    final res = await repositoryCall(event.params);
     res.fold((l) {
       log('Error: ${l.message}');
       onFailure(emit, l);
@@ -46,15 +46,15 @@ abstract class BaseScreenBloc<T, N extends IBaseRepository<T>,
     });
   }
 
-  FutureOr<void> _restoreData(
+  FutureOr<void> restoreData(
     RestoreData event,
-    Emitter<BaseScreenState<T>> emit,
+    Emitter<BaseDataState<T>> emit,
   ) async {
     // ignore: prefer_const_constructors
-    emit(BaseScreenState());
+    emit(BaseDataState());
   }
 
-  void onFailure(Emitter<BaseScreenState<T>> emit, Failure failure) {
+  void onFailure(Emitter<BaseDataState<T>> emit, Failure failure) {
     emit(
       state.copyWith(
         message: failure.message,
@@ -65,9 +65,9 @@ abstract class BaseScreenBloc<T, N extends IBaseRepository<T>,
   }
 
   void onSuccess(
-    Emitter<BaseScreenState<T>> emit,
+    Emitter<BaseDataState<T>> emit,
     T value,
-    ScreenParams? params,
+    BaseDataParams? params,
   ) {
     emit(state.copyWith(status: ScreenStatusType.loaded, value: value));
   }
@@ -76,5 +76,20 @@ abstract class BaseScreenBloc<T, N extends IBaseRepository<T>,
     P? params,
   ) {
     return repository.callRepository(params?.toMap());
+  }
+
+  @override
+  void add(BaseDataEvent event) {
+    log('Event: ${event.toString()}');
+    if (event is CallAction) {
+      if (event.params is! P) {
+        throw Exception('This call action requires a parameter of type $P');
+      }
+    }
+    super.add(event);
+  }
+
+  void callAction(P? params) {
+    add(CallAction<P>(params: params));
   }
 }

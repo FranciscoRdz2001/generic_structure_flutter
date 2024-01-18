@@ -1,5 +1,5 @@
-class ScreenParams {
-  const ScreenParams();
+class BaseDataParams {
+  const BaseDataParams();
 
   Map<String, dynamic>? toMap() => null;
 }
