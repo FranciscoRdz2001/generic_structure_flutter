@@ -1,5 +1,5 @@
 class ScreenParams {
   const ScreenParams();
 
-  Map<String, dynamic> toJson() => {};
+  Map<String, dynamic>? toMap() => null;
 }

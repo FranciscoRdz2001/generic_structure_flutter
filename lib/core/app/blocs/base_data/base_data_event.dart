@@ -4,11 +4,9 @@ abstract class BaseScreenEvent extends Equatable {
   const BaseScreenEvent();
 }
 
-class CallAction extends BaseScreenEvent {
-  const CallAction({
-    this.params = const ScreenParams(),
-  });
-  final ScreenParams params;
+class CallAction<P extends ScreenParams> extends BaseScreenEvent {
+  const CallAction({this.params});
+  final ScreenParams? params;
 
   @override
   List<Object?> get props => [params];
