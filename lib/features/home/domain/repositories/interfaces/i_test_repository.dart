@@ -4,7 +4,7 @@ import 'package:generic_structure_flutter/domain/repositories/i_base_repository.
 
 class ITestRepository extends IBaseRepository<int> {
   @override
-  Future<Either<Failure, int>> callRepository(Map<String, dynamic>? params) {
+  Future<Either<Failure, int>> callRepository({Map<String, dynamic>? params}) {
     return Future.value(const Right(1));
   }
 }

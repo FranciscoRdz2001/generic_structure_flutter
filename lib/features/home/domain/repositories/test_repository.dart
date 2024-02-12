@@ -9,8 +9,9 @@ class TestRepository implements ITestRepository {
   const TestRepository({required this.dataSource});
 
   @override
-  Future<Either<Failure, int>> callRepository(
-      Map<String, dynamic>? params) async {
+  Future<Either<Failure, int>> callRepository({
+    Map<String, dynamic>? params,
+  }) async {
     try {
       final data = await dataSource.getTest();
       return Right(data);

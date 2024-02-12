@@ -4,27 +4,46 @@ import 'package:generic_structure_flutter/core/app/blocs/base_data/base_data_blo
 import 'package:generic_structure_flutter/core/app/services/internet_service.dart';
 import 'package:generic_structure_flutter/features/home/domain/datasources/test_datasource.dart';
 import 'package:generic_structure_flutter/features/home/domain/repositories/test_repository.dart';
-import 'package:generic_structure_flutter/features/home/presentation/blocs/params/test_query_params.dart';
-import 'package:generic_structure_flutter/features/home/presentation/blocs/test_bloc.dart';
+import 'package:generic_structure_flutter/features/home/presentation/blocs/test_with_params/params/test_query_params.dart';
+import 'package:generic_structure_flutter/features/home/presentation/blocs/test_with_params/test_bloc.dart';
+import 'package:generic_structure_flutter/features/home/presentation/blocs/test_without_params/test_without_params_bloc.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => TestBloc(
-        hasConnection: HasConnection(),
-        repository: TestRepository(
-          dataSource: TestDataSource(),
-        ),
-      )..add(
-          CallAction(
-            params: const TestQueryParams(
-              id: 1,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => TestWithParamsBloc(
+            hasConnection: HasConnection(),
+            repository: TestRepository(
+              dataSource: TestDataSource(),
             ),
-          ),
+          )..add(
+              const CallAction(
+                params: TestQueryParams(
+                  id: 1,
+                ),
+              ),
+            ),
         ),
+        BlocProvider(
+          create: (context) => TestWithoutParamsBloc(
+            hasConnection: HasConnection(),
+            repository: TestRepository(
+              dataSource: TestDataSource(),
+            ),
+          )..add(
+              const CallAction(
+                params: TestQueryParams(
+                  id: 1,
+                ),
+              ),
+            ),
+        ),
+      ],
       child: const _HomePage(),
     );
   }
@@ -49,10 +68,14 @@ class _HomePageState extends State<_HomePage> {
       appBar: AppBar(
         title: const Text('Material App Bar'),
       ),
-      body: BlocBuilder<TestBloc, BaseDataState<int>>(
+      body: BlocBuilder<TestWithoutParamsBloc, BaseDataState<int>>(
         builder: (context, state) {
-          return const Center(
-            child: Text('Home Page'),
+          return BlocBuilder<TestWithParamsBloc, BaseDataState<int>>(
+            builder: (context, state) {
+              return const Center(
+                child: Text('Home Page'),
+              );
+            },
           );
         },
       ),

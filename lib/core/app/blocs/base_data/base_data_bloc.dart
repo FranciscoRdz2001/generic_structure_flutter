@@ -7,17 +7,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:generic_structure_flutter/core/app/blocs/base_data/params/base_data_params.dart';
 import 'package:generic_structure_flutter/core/app/services/internet_service.dart';
 import 'package:generic_structure_flutter/domain/failures/failure.dart';
-import 'package:generic_structure_flutter/domain/repositories/i_base_repository.dart';
 
 part 'base_data_event.dart';
 part 'base_data_state.dart';
 
-abstract class BaseDataBloc<T, N extends IBaseRepository<T>,
-    P extends BaseDataParams> extends Bloc<BaseDataEvent, BaseDataState<T>> {
-  final N repository;
+abstract class BaseDataBloc<T, P extends BaseDataParams>
+    extends Bloc<BaseDataEvent, BaseDataState<T>> {
   BaseDataBloc({
     required this.hasConnection,
-    required this.repository,
   }) : super(BaseDataState<T>()) {
     on<CallAction<P>>(_onCallAction);
   }
@@ -29,7 +26,6 @@ abstract class BaseDataBloc<T, N extends IBaseRepository<T>,
     Emitter<BaseDataState<T>> emit,
   ) async {
     emit(state.copyWith(status: ScreenStatusType.loading));
-    log('Debug');
     late bool hasInternet;
     hasInternet = await hasConnection.call();
     if (!hasInternet) {
@@ -38,10 +34,10 @@ abstract class BaseDataBloc<T, N extends IBaseRepository<T>,
     }
     final res = await repositoryCall(event.params);
     res.fold((l) {
-      log('Error: ${l.message}');
+      log('${runtimeType.toString().split('.').last}: Error: ${l.message}');
       onFailure(emit, l);
     }, (r) {
-      log('Success: ${r.toString()}');
+      log('${runtimeType.toString().split('.').last}: Success: ${r.toString()}');
       onSuccess(emit, r, event.params);
     });
   }
@@ -74,20 +70,7 @@ abstract class BaseDataBloc<T, N extends IBaseRepository<T>,
 
   Future<Either<Failure, T>> repositoryCall(
     P? params,
-  ) {
-    return repository.callRepository(params?.toMap());
-  }
-
-  @override
-  void add(BaseDataEvent event) {
-    log('Event: ${event.toString()}');
-    if (event is CallAction) {
-      if (event.params is! P) {
-        throw Exception('This call action requires a parameter of type $P');
-      }
-    }
-    super.add(event);
-  }
+  );
 
   void callAction(P? params) {
     add(CallAction<P>(params: params));
